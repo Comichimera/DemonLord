@@ -7,6 +7,10 @@ import java.awt.Graphics;
 import java.util.Locale;
 import javax.swing.JPanel;
 import java.util.List;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.AudioInputStream;
+import java.io.File;
 
 public class GamePanel extends JPanel {
     private GameLoop gameLoop;
@@ -19,17 +23,21 @@ public class GamePanel extends JPanel {
     private LevelManager levelManager;
     private boolean showEndScreen;
     private WorldRenderer worldRenderer;
+    public boolean showIntroScreen = true;
+    private boolean isIntroActive = true;
 
     public GamePanel(Locale locale) {
         this.setPreferredSize(new Dimension(800, 600));
         this.setBackground(Color.BLACK);
         this.localizationManager = new LocalizationManager(locale);
         this.levelManager = new LevelManager();
-        this.setFocusable(true); // Ensure the panel is focusable
-        this.requestFocusInWindow(); // Request focus
-        System.out.println("GamePanel initialized."); // Debug statement
+        this.setFocusable(true);
+        this.requestFocusInWindow();
+        System.out.println("GamePanel initialized.");
+
         this.init();
-        this.startGame();
+        this.startGame();  // Start game loop and initialize
+        this.showIntroScreen = true; // Show intro screen initially
     }
 
     private void init() {
@@ -52,7 +60,8 @@ public class GamePanel extends JPanel {
         renderer.setAuraBarTextOffset(-7);
     }
 
-    private void startGame() {
+    public void startGame() {
+        this.init(); // Only initialize after pressing space
         this.gameLoop = new GameLoop(this);
         this.gameLoop.start();
     }
@@ -90,11 +99,15 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (worldRenderer != null) {
-            worldRenderer.render(g, getWidth(), getHeight());
-        }
-        if (showEndScreen) {
-            showEndScreen(g);
+        if (showIntroScreen) {
+            showIntroScreen(g);  // Display the intro screen
+        } else {
+            if (worldRenderer != null) {
+                worldRenderer.render(g, getWidth(), getHeight());
+            }
+            if (showEndScreen) {
+                showEndScreen(g);
+            }
         }
     }
 
@@ -111,6 +124,44 @@ public class GamePanel extends JPanel {
         g.drawString(this.localizationManager.getString("secrets") + ": 0", this.getWidth() / 2 - 100, this.getHeight() / 2 + 100);
         g.setFont(new Font("Arial", Font.PLAIN, 18));
         g.drawString("Press SPACE to continue", this.getWidth() / 2 - 100, this.getHeight() / 2 + 150);
+    }
+
+    private void showIntroScreen(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());
+
+        // Main Intro Text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 36));
+        g.drawString("Level One", this.getWidth() / 2 - 100, this.getHeight() / 2 - 100);
+        g.setFont(new Font("Arial", Font.PLAIN, 24));
+        g.drawString("Press SPACE to continue", this.getWidth() / 2 - 120, this.getHeight() / 2);
+
+        // Tip Section
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Tip:", this.getWidth() / 2 - 100, this.getHeight() - 80);
+        g.setFont(new Font("Arial", Font.PLAIN, 18));
+        g.drawString("You died?? Git gud LOSER!", this.getWidth() / 2 - 100, this.getHeight() - 50);
+    }
+
+    public void handleIntroScreenKeyPress() {
+        if (showIntroScreen) {
+            showIntroScreen = false;
+            this.startGame(); // Initialize and start the game loop
+            repaint();
+        }
+    }
+
+    public void playAudio(String filePath) {
+        try {
+            File audioFile = new File(filePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start(); // Play the audio
+        } catch (Exception e) {
+            e.printStackTrace(); // Print error if loading fails
+        }
     }
 
     public void handleEndScreenKeyPress() {

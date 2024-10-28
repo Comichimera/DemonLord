@@ -20,6 +20,7 @@ public class PlayerInputHandler implements KeyListener {
 
         timerManager.start(); // Ensure the timer starts on any key press
 
+
         switch (key) {
             case KeyEvent.VK_W:
                 player.setCurrentAction("F");
@@ -41,6 +42,10 @@ public class PlayerInputHandler implements KeyListener {
                 player.setCurrentAction("I");
                 if (gamePanel.isShowEndScreen()) {
                     gamePanel.handleEndScreenKeyPress();
+                } else if (gamePanel.showIntroScreen) {  // Check for intro screen
+                    System.out.println("Pressed");
+                    gamePanel.playAudio("src/resources/media/skelly_dance.wav");
+                    gamePanel.handleIntroScreenKeyPress();
                 } else if (player.isAtExit()) {
                     timerManager.stop();
                     gamePanel.update();

@@ -13,12 +13,8 @@ public class InputLogger {
     private boolean firstInputLogged = false;
 
     public InputLogger() {
-        try {
-            String fileName = "game_log_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".txt";
-            writer = new BufferedWriter(new FileWriter(fileName, true));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String fileName = "game_log_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".txt";
+        // writer = new BufferedWriter(new FileWriter(fileName, true));
     }
 
     public void logAction(String action) {

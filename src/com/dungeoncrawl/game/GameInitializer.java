@@ -18,12 +18,16 @@ public class GameInitializer {
     private GamePanel gamePanel;
     private TimerManager timerManager;
     private LevelManager levelManager;
+    private LocalizationManager localizationManager; // Add this line
     private List<Sprite> sprites;
+    private BufferedImage invSlotTexture;
+    private BufferedImage healthSlotTexture;
 
-    public GameInitializer(GamePanel gamePanel, TimerManager timerManager, LevelManager levelManager) {
+    public GameInitializer(GamePanel gamePanel, TimerManager timerManager, LevelManager levelManager, LocalizationManager localizationManager) { // Add localizationManager to constructor
         this.gamePanel = gamePanel;
         this.timerManager = timerManager;
         this.levelManager = levelManager;
+        this.localizationManager = localizationManager; // Initialize it here
     }
 
     public void loadResources() {
@@ -34,36 +38,30 @@ public class GameInitializer {
         this.moveSpeed = Double.parseDouble(properties.getProperty("movement_speed"));
         this.rotSpeed = Double.parseDouble(properties.getProperty("rotation_speed"));
         this.version = properties.getProperty("version");
+        this.wallTexture = ImageLoader.loadImage(this.levelManager.getCurrentLevelTexture());
+        this.doorTexture = ImageLoader.loadImage("/resources/assets/textures/door.png");
+        this.skeletonSprite = ImageLoader.loadImage("/resources/assets/sprites/skeleton.png");
+        this.invSlotTexture = ImageLoader.loadImage("/resources/assets/textures/invslot.png");
+        this.healthSlotTexture = ImageLoader.loadImage("/resources/assets/textures/healthslot.png");
         this.loadLevelResources();
     }
 
     public void loadLevelResources() {
-        System.out.println("Loading level resources...");
-        this.wallTexture = ImageLoader.loadImage(this.levelManager.getCurrentLevelTexture());
-        this.doorTexture = ImageLoader.loadImage("/resources/assets/textures/door.png");
-        this.skeletonSprite = ImageLoader.loadImage("/resources/assets/sprites/skeleton.png");
-        if (this.skeletonSprite != null) {
-            System.out.println("Skeleton sprite loaded successfully.");
-        } else {
-            System.out.println("Failed to load skeleton sprite.");
-        }
         this.map = MapLoader.loadMap(this.levelManager.getCurrentLevelMap(), this.playerStart);
-        this.sprites = initializeSprites();
-        this.player = new Player(this.playerStart[0], this.playerStart[1], 0.0, this.wallTexture, this.doorTexture, this.map, this.moveSpeed, this.rotSpeed, this.gamePanel, this.timerManager, this.sprites);
+        this.player = new Player(this.playerStart[0], this.playerStart[1], 0.0, this.wallTexture, this.doorTexture, this.map, this.moveSpeed, this.rotSpeed, this.gamePanel, this.timerManager, new ArrayList<>());
+        this.sprites = new ArrayList<>();
+
+        // Initialize sprites based on map data (wherever '5' appears on the map)
+        SpriteRenderer spriteRenderer = new SpriteRenderer(this.player, this.sprites);
+        spriteRenderer.initializeSpritesFromMap(this.map, this.skeletonSprite);
+
+        this.player.setSprites(this.sprites);
+        WorldRenderer worldRenderer = new WorldRenderer(this.player, this.wallTexture, this.doorTexture, this.skeletonSprite, this.map, this.version, this.timerManager, this.localizationManager, this.sprites, this.invSlotTexture, this.healthSlotTexture);
+        this.gamePanel.setWorldRenderer(worldRenderer);
     }
 
     private List<Sprite> initializeSprites() {
         List<Sprite> sprites = new ArrayList<>();
-        for (int i = 0; i < this.map.length; i++) {
-            for (int j = 0; j < this.map[i].length; j++) {
-                if (this.map[i][j] == 5) {
-                    sprites.add(new Sprite(i + 0.5, j + 0.5, this.skeletonSprite, this.map));
-                    this.map[i][j] = 0; // Mark original spawn square as walkable
-                    System.out.println("Sprite initialized at: (" + (i + 0.5) + ", " + (j + 0.5) + ")");
-                }
-            }
-        }
-        System.out.println("Initialized " + sprites.size() + " sprites.");
         return sprites;
     }
 
@@ -93,5 +91,13 @@ public class GameInitializer {
 
     public List<Sprite> getSprites() {
         return this.sprites;
+    }
+
+    public BufferedImage getInvSlotTexture() {
+        return this.invSlotTexture;
+    }
+
+    public BufferedImage getHealthSlotTexture() {
+        return this.healthSlotTexture;
     }
 }

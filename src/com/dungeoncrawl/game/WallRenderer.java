@@ -17,7 +17,7 @@ public class WallRenderer {
         this.map = map;
     }
 
-    public void renderWallsAndDoors(Graphics g, int width, int height) {
+    public void renderWallsAndDoors(Graphics g, int width, int height, double[] zBuffer) {
         Color floorColor = Color.RED;
         Color ceilingColor = Color.LIGHT_GRAY;
         Color exitColor = Color.YELLOW;
@@ -81,6 +81,8 @@ public class WallRenderer {
                 perpWallDist = (mapY - this.player.y + (1 - stepY) / 2) / rayDirY;
             }
 
+            zBuffer[x] = perpWallDist;
+
             int lineHeight = (int) (height / perpWallDist);
 
             int drawStart = -lineHeight / 2 + height / 2;
@@ -118,15 +120,17 @@ public class WallRenderer {
                 int floorMapX = (int) floorX;
                 int floorMapY = (int) floorY;
 
+                // Render the floor even if there are adjacent walls
                 if (floorMapX >= 0 && floorMapX < map.length && floorMapY >= 0 && floorMapY < map[0].length) {
                     if (map[floorMapX][floorMapY] == 2) {
                         g.setColor(exitColor);
-                    } else if (map[floorMapX][floorMapY] == 0) {
+                    } else if (map[floorMapX][floorMapY] == 0 || map[floorMapX][floorMapY] == 5) {  // Ensure floor renders under sprites
                         g.setColor(floorColor);
                     }
                     g.drawLine(x, y, x, y);
                 }
             }
+
         }
     }
 }

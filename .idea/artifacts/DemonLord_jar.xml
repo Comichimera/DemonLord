@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DemonLord:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DemonLord_jar</output-path>
+    <root id="archive" name="DemonLord.jar">
+      <element id="module-output" name="DemonLord" />
+      <element id="library" level="project" name="dungeoncrawler-pre-alpha-1.0.4" />
+    </root>
+  </artifact>
+</component>

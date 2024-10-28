@@ -41,6 +41,10 @@ public class Player implements KeyListener {
         this.inputLogger = new InputLogger();
     }
 
+    public void setSprites(List<Sprite> sprites) {
+        this.sprites = sprites;
+    }
+
     public void update() {
         inputLogger.logAction(currentAction);
         currentAction = "N";  // Reset action for the next frame
@@ -89,22 +93,20 @@ public class Player implements KeyListener {
     }
 
     public void moveForward() {
-        if (canMoveTo(this.x + this.dirX * this.moveSpeed, this.y)) {
-            this.x += this.dirX * this.moveSpeed;
-        }
-
-        if (canMoveTo(this.x, this.y + this.dirY * this.moveSpeed)) {
-            this.y += this.dirY * this.moveSpeed;
+        double newX = this.x + this.dirX * this.moveSpeed;
+        double newY = this.y + this.dirY * this.moveSpeed;
+        if (canMoveTo(newX, newY)) {
+            this.x = newX;
+            this.y = newY;
         }
     }
 
     public void moveBackward() {
-        if (canMoveTo(this.x - this.dirX * this.moveSpeed, this.y)) {
-            this.x -= this.dirX * this.moveSpeed;
-        }
-
-        if (canMoveTo(this.x, this.y - this.dirY * this.moveSpeed)) {
-            this.y -= this.dirY * this.moveSpeed;
+        double newX = this.x - this.dirX * this.moveSpeed;
+        double newY = this.y - this.dirY * this.moveSpeed;
+        if (canMoveTo(newX, newY)) {
+            this.x = newX;
+            this.y = newY;
         }
     }
 

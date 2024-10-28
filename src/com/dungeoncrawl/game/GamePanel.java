@@ -18,6 +18,7 @@ public class GamePanel extends JPanel {
     private LocalizationManager localizationManager;
     private LevelManager levelManager;
     private boolean showEndScreen;
+    private WorldRenderer worldRenderer;
 
     public GamePanel(Locale locale) {
         this.setPreferredSize(new Dimension(800, 600));
@@ -33,14 +34,22 @@ public class GamePanel extends JPanel {
 
     private void init() {
         this.timerManager = new TimerManager();
-        this.initializer = new GameInitializer(this, this.timerManager, this.levelManager);
+        this.initializer = new GameInitializer(this, this.timerManager, this.levelManager, this.localizationManager);
         this.initializer.loadResources();
         this.player = this.initializer.getPlayer();
-        this.renderer = new WorldRenderer(this.player, this.initializer.getWallTexture(), this.initializer.getDoorTexture(), this.initializer.getSkeletonSprite(), this.initializer.getMap(), this.initializer.getVersion(), this.timerManager, this.localizationManager, this.initializer.getSprites());
+        this.renderer = new WorldRenderer(this.player, this.initializer.getWallTexture(), this.initializer.getDoorTexture(), this.initializer.getSkeletonSprite(), this.initializer.getMap(), this.initializer.getVersion(), this.timerManager, this.localizationManager, this.initializer.getSprites(), this.initializer.getInvSlotTexture(), this.initializer.getHealthSlotTexture());
         this.addKeyListener(new PlayerInputHandler(this.player, this.timerManager, this)); // Moved here to ensure re-initialization
         this.setFocusable(true);
         this.requestFocus();
         this.showEndScreen = false;
+
+        renderer.setHealthBarPosition(575, 494);
+        renderer.setHealthBarLength(200);
+        renderer.setHealthBarTextOffset(-7);
+
+        renderer.setAuraBarPosition(575, 532);
+        renderer.setAuraBarLength(200);
+        renderer.setAuraBarTextOffset(-7);
     }
 
     private void startGame() {
@@ -78,12 +87,14 @@ public class GamePanel extends JPanel {
         }
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (this.showEndScreen) {
-            this.showEndScreen(g);
-        } else {
-            this.renderer.render(g, this.getWidth(), this.getHeight());
+        if (worldRenderer != null) {
+            worldRenderer.render(g, getWidth(), getHeight());
+        }
+        if (showEndScreen) {
+            showEndScreen(g);
         }
     }
 
@@ -91,14 +102,14 @@ public class GamePanel extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", 1, 36));
+        g.setFont(new Font("Arial", Font.BOLD, 36));
         g.drawString(this.localizationManager.getString("level_complete"), this.getWidth() / 2 - 100, this.getHeight() / 2 - 150);
-        g.setFont(new Font("Arial", 0, 24));
+        g.setFont(new Font("Arial", Font.PLAIN, 24));
         g.drawString(this.localizationManager.getString("time") + ": " + this.timerManager.formatElapsedTime(), this.getWidth() / 2 - 100, this.getHeight() / 2 - 50);
         g.drawString(this.localizationManager.getString("kills") + ": 0", this.getWidth() / 2 - 100, this.getHeight() / 2);
         g.drawString(this.localizationManager.getString("score") + ": 0", this.getWidth() / 2 - 100, this.getHeight() / 2 + 50);
         g.drawString(this.localizationManager.getString("secrets") + ": 0", this.getWidth() / 2 - 100, this.getHeight() / 2 + 100);
-        g.setFont(new Font("Arial", 0, 18));
+        g.setFont(new Font("Arial", Font.PLAIN, 18));
         g.drawString("Press SPACE to continue", this.getWidth() / 2 - 100, this.getHeight() / 2 + 150);
     }
 
@@ -124,5 +135,9 @@ public class GamePanel extends JPanel {
 
     public List<Sprite> getSprites() {
         return renderer.getSprites();
+    }
+
+    public void setWorldRenderer(WorldRenderer worldRenderer) {
+        this.worldRenderer = worldRenderer;
     }
 }

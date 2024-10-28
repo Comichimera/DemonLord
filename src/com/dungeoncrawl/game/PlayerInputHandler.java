@@ -44,7 +44,6 @@ public class PlayerInputHandler implements KeyListener {
                     gamePanel.handleEndScreenKeyPress();
                 } else if (gamePanel.showIntroScreen) {  // Check for intro screen
                     System.out.println("Pressed");
-                    gamePanel.playAudio("src/resources/media/skelly_dance.wav");
                     gamePanel.handleIntroScreenKeyPress();
                 } else if (player.isAtExit()) {
                     timerManager.stop();
